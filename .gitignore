@@ -1,0 +1,103 @@
+# 依賴套件
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# 環境變數檔案
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 建置輸出
+dist/
+build/
+out/
+.next/
+.nuxt/
+.vuepress/dist
+.serverless/
+.fusebox/
+.dynamodb/
+
+# 快取目錄
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+
+# 日誌檔案
+logs/
+*.log
+
+# 執行時資料
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# 覆蓋率報告
+coverage/
+*.lcov
+.nyc_output
+
+# 編輯器設定
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 作業系統檔案
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# 暫存檔案
+*.tmp
+*.temp
+.tmp/
+.temp/
+
+# 憑證檔案
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# Google Apps Script 相關
+.clasp.json
+.claspignore
+
+# LINE LIFF 相關
+liff-config.json
+
+# 測試相關
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+test-results.xml
+
+# 備份檔案
+*.bak
+*.backup
+*.old
+
+# 壓縮檔案
+*.zip
+*.tar.gz
+*.rar
+
+# 本地開發檔案
+local/
+dev/ 
