@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>麵包購買習慣調查</title>
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="liffApp">
+        <!-- 載入中畫面 -->
+        <div id="loading" class="loading-container">
+            <div class="loading-spinner"></div>
+            <p>載入中...</p>
+        </div>
+
+        <!-- 問卷表單 -->
+        <div id="surveyForm" class="survey-container" style="display: none;">
+            <header class="survey-header">
+                <h1>🍞 麵包購買習慣調查</h1>
+                <p>感謝您參與本次調查，您的意見對我們非常重要！</p>
+            </header>
+
+            <form id="questionnaireForm" class="questionnaire-form">
+                <!-- Part 1: 基本背景 -->
+                <section class="survey-section">
+                    <h2>📋 Part 1：基本背景</h2>
+                    
+                    <div class="question-group">
+                        <label class="question-label">1. 手機號碼 ：</label>
+                        <input type="tel" name="phone_number" class="text-input phone-input" 
+                               placeholder="請輸入您的手機號碼，例如：0912345678" 
+                               pattern="[0-9]{10}" 
+                               maxlength="10" 
+                               required>
+                        <small class="input-hint">請輸入10位數字的手機號碼</small>
+                    </div>
+                    
+                    <div class="question-group">
+                        <label class="question-label">2. 年齡：</label>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="age" value="25歲以下" required>
+                                <span class="radio-custom"></span>
+                                25歲以下
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="age" value="26-45歲" required>
+                                <span class="radio-custom"></span>
+                                26-45歲
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="age" value="46歲以上" required>
+                                <span class="radio-custom"></span>
+                                46歲以上
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="question-group">
+                        <label class="question-label">3. 性別：</label>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="gender" value="男" required>
+                                <span class="radio-custom"></span>
+                                男
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="gender" value="女" required>
+                                <span class="radio-custom"></span>
+                                女
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="question-group">
+                        <label class="question-label">4. 居住地：</label>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="location" value="附近" required>
+                                <span class="radio-custom"></span>
+                                附近
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="location" value="外地" required>
+                                <span class="radio-custom"></span>
+                                外地
+                            </label>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Part 2: 購買習慣調查 -->
+                <section class="survey-section">
+                    <h2>🛒 Part 2：購買習慣調查</h2>
+                    
+                    <div class="question-group">
+                        <label class="question-label">1. 你平均多久買一次麵包？</label>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="purchase_frequency" value="每週3次以上" required>
+                                <span class="radio-custom"></span>
+                                每週3次以上
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="purchase_frequency" value="每週1~3次" required>
+                                <span class="radio-custom"></span>
+                                每週1~3次
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="purchase_frequency" value="偶爾" required>
+                                <span class="radio-custom"></span>
+                                偶爾
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="question-group">
+                        <label class="question-label">2. 你通常在哪裡購買麵包？(可複選)</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="purchase_location" value="麵包店">
+                                <span class="checkbox-custom"></span>
+                                麵包店
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="purchase_location" value="便利商店">
+                                <span class="checkbox-custom"></span>
+                                便利商店
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="purchase_location" value="量販超市">
+                                <span class="checkbox-custom"></span>
+                                量販超市
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="purchase_location" value="網購">
+                                <span class="checkbox-custom"></span>
+                                網購
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="question-group">
+                        <label class="question-label">3. 購買麵包的時間通常是？</label>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="purchase_time" value="早上(6:00~12:00)" required>
+                                <span class="radio-custom"></span>
+                                早上(6:00~12:00)
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="purchase_time" value="下午(12:00~17:00)" required>
+                                <span class="radio-custom"></span>
+                                下午(12:00~17:00)
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="purchase_time" value="晚上(17:00後)" required>
+                                <span class="radio-custom"></span>
+                                晚上(17:00後)
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="question-group">
+                        <label class="question-label">4. 麵包通常是你的哪一餐?</label>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="meal_type" value="早餐" required>
+                                <span class="radio-custom"></span>
+                                早餐
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="meal_type" value="點心" required>
+                                <span class="radio-custom"></span>
+                                點心
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="meal_type" value="其他" required>
+                                <span class="radio-custom"></span>
+                                其他
+                            </label>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Part 3: 選擇考量 -->
+                <section class="survey-section">
+                    <h2>🎯 Part 3：選擇考量</h2>
+                    
+                    <div class="question-group">
+                        <label class="question-label">1. 你在選購麵包時最重視什麼？（可複選）</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="priority_factors" value="價格">
+                                <span class="checkbox-custom"></span>
+                                價格
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="priority_factors" value="健康">
+                                <span class="checkbox-custom"></span>
+                                健康
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="priority_factors" value="好吃">
+                                <span class="checkbox-custom"></span>
+                                好吃
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="priority_factors" value="口味嚐鮮">
+                                <span class="checkbox-custom"></span>
+                                口味嚐鮮
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="priority_factors" value="美觀">
+                                <span class="checkbox-custom"></span>
+                                美觀
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="priority_factors" value="衛生">
+                                <span class="checkbox-custom"></span>
+                                衛生
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="question-group">
+                        <label class="question-label">2. 為了健康，你會為了「較好食材」多花一點錢嗎？</label>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="health_premium" value="會" required>
+                                <span class="radio-custom"></span>
+                                會
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="health_premium" value="不會" required>
+                                <span class="radio-custom"></span>
+                                不會
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="question-group">
+                        <label class="question-label">3. 你希望麵包食材天然無添加，即使比較不香？</label>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="natural_preference" value="在意" required>
+                                <span class="radio-custom"></span>
+                                在意
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="natural_preference" value="不在意" required>
+                                <span class="radio-custom"></span>
+                                不在意
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="question-group">
+                        <label class="question-label">4. 你偏好麵包口味？(可複選)</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="taste_preference" value="鹹">
+                                <span class="checkbox-custom"></span>
+                                鹹
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="taste_preference" value="甜">
+                                <span class="checkbox-custom"></span>
+                                甜
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="taste_preference" value="都愛">
+                                <span class="checkbox-custom"></span>
+                                都愛
+                            </label>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Part 4: 意見與建議 -->
+                <section class="survey-section">
+                    <h2>💭 Part 4：意見與建議</h2>
+                    
+                    <div class="question-group">
+                        <label class="question-label">1. 你常吃的麵包種類?(可複選)</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="bread_types" value="吐司">
+                                <span class="checkbox-custom"></span>
+                                吐司
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="bread_types" value="台式、日式麵包">
+                                <span class="checkbox-custom"></span>
+                                台式、日式麵包
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="bread_types" value="歐式麵包">
+                                <span class="checkbox-custom"></span>
+                                歐式麵包
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="bread_types" value="法國麵包">
+                                <span class="checkbox-custom"></span>
+                                法國麵包
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="bread_types" value="丹麥可頌">
+                                <span class="checkbox-custom"></span>
+                                丹麥可頌
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="bread_types" value="貝果系列">
+                                <span class="checkbox-custom"></span>
+                                貝果系列
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="bread_types" value="無麩質麵包">
+                                <span class="checkbox-custom"></span>
+                                無麩質麵包
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="bread_types" value="其他">
+                                <span class="checkbox-custom"></span>
+                                其他
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="question-group">
+                        <label class="question-label">2. 你最喜歡的麵包/蛋糕是什麼？(不限幾種)</label>
+                        <textarea name="favorite_bread" class="text-input" placeholder="請分享你最喜歡的麵包或蛋糕種類..."></textarea>
+                    </div>
+
+                    <div class="question-group">
+                        <label class="question-label">3. 你想吃但市面上很難找的麵包/蛋糕？(不限幾種)</label>
+                        <textarea name="hard_to_find_bread" class="text-input" placeholder="請分享你希望能在市面上找到的麵包或蛋糕..."></textarea>
+                    </div>
+                </section>
+
+                <!-- 提交按鈕 -->
+                <div class="submit-section">
+                    <button type="submit" id="submitBtn" class="submit-btn">
+                        <span class="btn-text">提交問卷</span>
+                        <span class="btn-loading" style="display: none;">提交中...</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 提交成功畫面 -->
+        <div id="successMessage" class="success-container" style="display: none;">
+            <div class="success-content">
+                <div class="success-icon">✅</div>
+                <h2>問卷提交成功！</h2>
+                <p>感謝您參與本次調查，您的寶貴意見將幫助我們提供更好的服務。</p>
+                <button id="closeBtn" class="close-btn">關閉</button>
+            </div>
+        </div>
+
+        <!-- 錯誤訊息 -->
+        <div id="errorMessage" class="error-container" style="display: none;">
+            <div class="error-content">
+                <div class="error-icon">❌</div>
+                <h2>提交失敗</h2>
+                <p id="errorText">發生錯誤，請稍後再試。</p>
+                <button id="retryBtn" class="retry-btn">重試</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

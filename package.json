@@ -1,0 +1,36 @@
+{
+  "name": "liff-survey-system",
+  "version": "1.0.0",
+  "description": "LIFF 問卷調查系統 - 麵包購買習慣調查",
+  "main": "index.html",
+  "scripts": {
+    "dev": "python3 -m http.server 8000",
+    "start": "python3 -m http.server 8000",
+    "build": "echo '靜態檔案，無需建置'",
+    "test": "echo '暫無測試腳本'",
+    "lint": "echo '暫無 lint 設定'"
+  },
+  "keywords": [
+    "liff",
+    "line",
+    "survey",
+    "questionnaire",
+    "google-apps-script",
+    "google-sheets"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "your-repository-url"
+  },
+  "bugs": {
+    "url": "your-repository-url/issues"
+  },
+  "homepage": "your-repository-url#readme",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "devDependencies": {},
+  "dependencies": {}
+} 
