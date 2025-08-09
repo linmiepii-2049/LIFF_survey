@@ -365,12 +365,13 @@ class LIFFSurveyApp {
         }
 
         try {
+            // 使用 form-data 避免 CORS 預檢，GAS 會從 e.postData.contents 取得 JSON
+            const formData = new FormData();
+            formData.append('data', JSON.stringify({ action: 'submitSurvey', data }));
+            
             const response = await fetch(GAS_URL, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'text/plain;charset=utf-8',
-                },
-                body: JSON.stringify({ action: 'submitSurvey', data }),
+                body: formData,
                 signal: controller.signal,
             });
             clearTimeout(timerId);

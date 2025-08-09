@@ -15,8 +15,20 @@ function doPost(e) {
     // 若直接從瀏覽器呼叫將可能觸發預檢，建議改走代理
     // 這裡不再嘗試手動設定 CORS 標頭，避免 Apps Script setHeaders 相關錯誤
 
-    // 解析請求資料
-    const requestData = JSON.parse(e.postData.contents);
+    // 解析請求資料 - 支援 JSON 或 FormData
+    let requestData;
+    try {
+      if (e.postData.contents) {
+        requestData = JSON.parse(e.postData.contents);
+      } else if (e.parameter.data) {
+        requestData = JSON.parse(e.parameter.data);
+      } else {
+        throw new Error('無法取得請求資料');
+      }
+    } catch (parseError) {
+      console.error('解析請求失敗:', parseError, 'Raw:', e.postData.contents);
+      throw new Error('請求格式錯誤');
+    }
     console.log('收到請求資料:', requestData);
 
     // 驗證請求
@@ -61,20 +73,12 @@ function doPost(e) {
  * 處理 GET 請求
  */
 function doGet(e) {
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Content-Type': 'application/json'
-  };
-
   return ContentService.createTextOutput(JSON.stringify({
     success: true,
     message: 'LIFF 問卷調查 API 服務正常運行',
     timestamp: new Date().toISOString()
   }))
-  .setMimeType(ContentService.MimeType.JSON)
-  .setHeaders(headers);
+  .setMimeType(ContentService.MimeType.JSON);
 }
 
 /**
