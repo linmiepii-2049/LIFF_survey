@@ -12,20 +12,8 @@ const SHEET_NAME = '問卷回應資料';
  */
 function doPost(e) {
   try {
-    // 設定 CORS 標頭
-    const headers = {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-      'Content-Type': 'application/json'
-    };
-
-    // 處理 OPTIONS 請求 (CORS preflight)
-    if (e.parameter.method === 'OPTIONS') {
-      return ContentService.createTextOutput('')
-        .setMimeType(ContentService.MimeType.TEXT)
-        .setHeaders(headers);
-    }
+    // 若直接從瀏覽器呼叫將可能觸發預檢，建議改走代理
+    // 這裡不再嘗試手動設定 CORS 標頭，避免 Apps Script setHeaders 相關錯誤
 
     // 解析請求資料
     const requestData = JSON.parse(e.postData.contents);
@@ -55,8 +43,7 @@ function doPost(e) {
       success: true,
       data: response
     }))
-    .setMimeType(ContentService.MimeType.JSON)
-    .setHeaders(headers);
+    .setMimeType(ContentService.MimeType.JSON);
 
   } catch (error) {
     console.error('處理請求時發生錯誤:', error);
@@ -66,13 +53,7 @@ function doPost(e) {
       success: false,
       error: error.message || '處理請求時發生錯誤'
     }))
-    .setMimeType(ContentService.MimeType.JSON)
-    .setHeaders({
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-      'Content-Type': 'application/json'
-    });
+    .setMimeType(ContentService.MimeType.JSON);
   }
 }
 

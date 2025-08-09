@@ -16,7 +16,7 @@ const config = {
 
   // 後端 API 設定 (如果使用)
   api: {
-    baseUrl: 'http://localhost:3000',
+    baseUrl: '', // 留空則直接呼叫 GAS，填入代理網址則走代理
     timeout: 10000
   },
 

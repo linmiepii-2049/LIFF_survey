@@ -5,7 +5,9 @@
   "main": "index.html",
   "scripts": {
     "dev": "python3 -m http.server 8000",
-    "start": "python3 -m http.server 8000",
+    "web": "python3 -m http.server 8000",
+    "proxy": "node server.js",
+    "start": "node server.js",
     "build": "echo '靜態檔案，無需建置'",
     "test": "echo '暫無測試腳本'",
     "lint": "echo '暫無 lint 設定'"
@@ -32,5 +34,9 @@
     "node": ">=14.0.0"
   },
   "devDependencies": {},
-  "dependencies": {}
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "node-fetch": "^2.7.0"
+  }
 } 

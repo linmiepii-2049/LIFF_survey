@@ -323,10 +323,16 @@ class LIFFSurveyApp {
      */
     async submitToGoogleAppsScript(data) {
         // 從設定檔讀取 Google Apps Script Web App URL
+        // 若設定有代理，優先走代理，可避免 CORS
+        const proxyBase = (typeof window !== 'undefined' && window.SurveyConfig && window.SurveyConfig.api && window.SurveyConfig.api.baseUrl)
+            ? window.SurveyConfig.api.baseUrl
+            : '';
+        const useProxy = Boolean(proxyBase);
+
         const configUrl = (typeof window !== 'undefined' && window.SurveyConfig && window.SurveyConfig.googleAppsScript && window.SurveyConfig.googleAppsScript.url)
             ? window.SurveyConfig.googleAppsScript.url
             : '';
-        const GAS_URL = configUrl || 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL';
+        const GAS_URL = useProxy ? `${proxyBase.replace(/\/$/, '')}/liff/survey` : (configUrl || 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL');
 
         // 開發/無設定模式：模擬成功回應
         const isDebug = !!(typeof window !== 'undefined' && window.SurveyConfig && window.SurveyConfig.app && window.SurveyConfig.app.debug);
@@ -362,7 +368,7 @@ class LIFFSurveyApp {
             const response = await fetch(GAS_URL, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'text/plain;charset=utf-8',
                 },
                 body: JSON.stringify({ action: 'submitSurvey', data }),
                 signal: controller.signal,
