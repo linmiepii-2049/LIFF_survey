@@ -56,9 +56,12 @@ class LIFFSurveyApp {
      * 獲取 LIFF ID
      */
     getLiffId() {
-        // 從環境變數或 URL 參數獲取 LIFF ID
+        // 優先從全域設定取得，其次讀取 URL 參數，最後使用預設值
+        const fromConfig = (typeof window !== 'undefined' && window.SurveyConfig && window.SurveyConfig.liff && window.SurveyConfig.liff.id)
+            ? window.SurveyConfig.liff.id
+            : null;
         const urlParams = new URLSearchParams(window.location.search);
-        this.liffId = urlParams.get('liffId') || 'your-liff-id-here';
+        this.liffId = fromConfig || urlParams.get('liffId') || 'your-liff-id-here';
         return this.liffId;
     }
 
@@ -283,16 +286,20 @@ class LIFFSurveyApp {
      * 提交到 Google Apps Script
      */
     async submitToGoogleAppsScript(data) {
-        // Google Apps Script Web App URL
-        const GAS_URL = 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL';
+        // 從設定檔讀取 Google Apps Script Web App URL
+        const configUrl = (typeof window !== 'undefined' && window.SurveyConfig && window.SurveyConfig.googleAppsScript && window.SurveyConfig.googleAppsScript.url)
+            ? window.SurveyConfig.googleAppsScript.url
+            : '';
+        const GAS_URL = configUrl || 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL';
         
-        // 開發模式：模擬成功回應
-        if (GAS_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') {
-            console.log('開發模式：模擬提交成功', data);
+        // 僅在未設定 URL 或顯式開啟 mock 時才模擬提交
+        const isMockEnabled = !!(typeof window !== 'undefined' && window.SurveyConfig && window.SurveyConfig.app && window.SurveyConfig.app.mock === true);
+        if (!configUrl || isMockEnabled) {
+            console.log('模擬提交（未設定 GAS URL 或已開啟 mock）:', data);
             return {
                 success: true,
                 data: {
-                    message: '開發模式：問卷提交成功',
+                    message: '模擬：問卷提交成功',
                     submissionId: Date.now(),
                     timestamp: new Date().toISOString()
                 }
