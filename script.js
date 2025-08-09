@@ -291,43 +291,110 @@ class LIFFSurveyApp {
             ? window.SurveyConfig.googleAppsScript.url
             : '';
         const GAS_URL = configUrl || 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL';
-        
-        // 僅在未設定 URL 或顯式開啟 mock 時才模擬提交
-        const isMockEnabled = !!(typeof window !== 'undefined' && window.SurveyConfig && window.SurveyConfig.app && window.SurveyConfig.app.mock === true);
-        if (!configUrl || isMockEnabled) {
-            console.log('模擬提交（未設定 GAS URL 或已開啟 mock）:', data);
+
+        // 開發/無設定模式：模擬成功回應
+        const isDebug = !!(typeof window !== 'undefined' && window.SurveyConfig && window.SurveyConfig.app && window.SurveyConfig.app.debug);
+        if (!configUrl || isDebug) {
+            console.log('開發模式：模擬提交成功', data);
             return {
                 success: true,
                 data: {
-                    message: '模擬：問卷提交成功',
+                    message: '開發模式：問卷提交成功',
                     submissionId: Date.now(),
                     timestamp: new Date().toISOString()
                 }
             };
         }
-        
+
+        // 連線逾時控制
+        const timeoutMs = 15000;
+        const controller = new AbortController();
+        const timerId = setTimeout(() => controller.abort(), timeoutMs);
+
+        // 混合內容檢查（https 頁面呼叫 http API 會被瀏覽器封鎖）
+        const isMixedContent = window.location.protocol === 'https:' && GAS_URL.startsWith('http://');
+        if (isMixedContent) {
+            throw new Error('安全限制：頁面為 HTTPS，但 API 為 HTTP（混合內容被封鎖）。請改用 HTTPS 的 Web App URL');
+        }
+
+        // 離線檢查
+        if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+            throw new Error('裝置目前離線，請檢查網路後再試');
+        }
+
         try {
             const response = await fetch(GAS_URL, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    action: 'submitSurvey',
-                    data: data
-                })
+                body: JSON.stringify({ action: 'submitSurvey', data }),
+                signal: controller.signal,
             });
+            clearTimeout(timerId);
 
+            // HTTP 非 2xx：回傳更精確錯誤
             if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                let bodyText = '';
+                try { bodyText = await response.text(); } catch (_) {}
+
+                // 嘗試解析 JSON 以取得後端錯誤訊息
+                let bodyJson = null;
+                try { bodyJson = JSON.parse(bodyText); } catch (_) {}
+
+                const status = response.status;
+                const statusText = response.statusText || '';
+
+                if (status === 401 || status === 403) {
+                    const hint = '權限不足：請在 GAS Deploy > Manage deployments 中將 Web app 權限設為「Anyone」，並確認使用的是最新部署的 URL（/exec）';
+                    throw new Error(`HTTP ${status} ${statusText}：${hint}`);
+                }
+                if (status === 404) {
+                    const hint = '找不到 Web App：請確認 URL 是否正確，且路徑包含 /exec 而非 /dev 或 /usercallback';
+                    throw new Error(`HTTP 404：${hint}`);
+                }
+                if (status === 429) {
+                    throw new Error('HTTP 429：請求過多或配額限制，請稍後再試');
+                }
+                if (status >= 500 && status <= 599) {
+                    const hint = '伺服器錯誤：請在 Apps Script 編輯器查看 Execution log 以排查程式錯誤';
+                    const detail = bodyJson?.error || bodyText || '';
+                    throw new Error(`HTTP ${status} 伺服器錯誤：${hint}${detail ? `（${detail}）` : ''}`);
+                }
+
+                const detail = bodyJson?.error || bodyText || '未知錯誤';
+                throw new Error(`HTTP ${status} ${statusText}：${detail}`);
             }
 
-            const result = await response.json();
-            return result;
+            // 解析成功回應
+            const resultText = await response.text();
+            let result;
+            try {
+                result = JSON.parse(resultText);
+            } catch (e) {
+                throw new Error(`回應格式錯誤（非 JSON）：${resultText?.slice(0, 200) || ''}`);
+            }
+
+            if (result && result.success === true) {
+                return result;
+            }
+
+            const backendError = result?.error || '伺服器回傳失敗，請稍後再試';
+            throw new Error(backendError);
 
         } catch (error) {
-            console.error('Google Apps Script 請求失敗:', error);
-            throw new Error('網路連線失敗，請檢查網路連線後重試');
+            clearTimeout(timerId);
+            // 逾時
+            if (error.name === 'AbortError') {
+                throw new Error(`連線逾時（>${timeoutMs / 1000}s）：請確認網路、GAS 狀態或稍後再試`);
+            }
+            // 可能的 CORS / DNS / 連線被擋
+            if (error instanceof TypeError || /Failed to fetch|NetworkError/i.test(error.message)) {
+                const hint = '請檢查：1) GAS Web App 已部署且權限為「Anyone」；2) URL 正確且可直接在瀏覽器開啟；3) 若在公司網路/代理，請排除封鎖；4) 檢查瀏覽器 Console 的 CORS 訊息';
+                throw new Error(`連線失敗：${hint}`);
+            }
+            // 其餘錯誤直接往上拋，保留詳細訊息
+            throw error;
         }
     }
 

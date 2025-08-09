@@ -8,17 +8,37 @@ const SPREADSHEET_ID = '1oyIZOeG2qcS5AjK9DQC_ahNs_tpLPjVi-46ilmGus2s'; // 請替
 const SHEET_NAME = '問卷回應資料';
 
 /**
- * 處理 Web App 請求（POST）
+ * 處理 Web App 請求
  */
 function doPost(e) {
   try {
-    const requestData = JSON.parse(e && e.postData && e.postData.contents ? e.postData.contents : '{}');
+    // 設定 CORS 標頭
+    const headers = {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Content-Type': 'application/json'
+    };
 
+    // 處理 OPTIONS 請求 (CORS preflight)
+    if (e.parameter.method === 'OPTIONS') {
+      return ContentService.createTextOutput('')
+        .setMimeType(ContentService.MimeType.TEXT)
+        .setHeaders(headers);
+    }
+
+    // 解析請求資料
+    const requestData = JSON.parse(e.postData.contents);
+    console.log('收到請求資料:', requestData);
+
+    // 驗證請求
     if (!requestData.action || !requestData.data) {
       throw new Error('無效的請求格式');
     }
 
     let response;
+
+    // 根據動作類型處理
     switch (requestData.action) {
       case 'submitSurvey':
         response = handleSurveySubmission(requestData.data);
@@ -30,29 +50,50 @@ function doPost(e) {
         throw new Error('不支援的動作類型');
     }
 
-    return ContentService
-      .createTextOutput(JSON.stringify({ success: true, data: response }))
-      .setMimeType(ContentService.MimeType.JSON);
+    // 回傳成功回應
+    return ContentService.createTextOutput(JSON.stringify({
+      success: true,
+      data: response
+    }))
+    .setMimeType(ContentService.MimeType.JSON)
+    .setHeaders(headers);
 
   } catch (error) {
-    Logger.log('處理請求時發生錯誤: ' + error);
-    return ContentService
-      .createTextOutput(JSON.stringify({ success: false, error: error.message || '處理請求時發生錯誤' }))
-      .setMimeType(ContentService.MimeType.JSON);
+    console.error('處理請求時發生錯誤:', error);
+    
+    // 回傳錯誤回應
+    return ContentService.createTextOutput(JSON.stringify({
+      success: false,
+      error: error.message || '處理請求時發生錯誤'
+    }))
+    .setMimeType(ContentService.MimeType.JSON)
+    .setHeaders({
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Content-Type': 'application/json'
+    });
   }
 }
 
 /**
- * 處理 Web App 請求（GET）
+ * 處理 GET 請求
  */
 function doGet(e) {
-  return ContentService
-    .createTextOutput(JSON.stringify({
-      success: true,
-      message: 'LIFF 問卷調查 API 服務正常運行',
-      timestamp: new Date().toISOString()
-    }))
-    .setMimeType(ContentService.MimeType.JSON);
+  const headers = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Content-Type': 'application/json'
+  };
+
+  return ContentService.createTextOutput(JSON.stringify({
+    success: true,
+    message: 'LIFF 問卷調查 API 服務正常運行',
+    timestamp: new Date().toISOString()
+  }))
+  .setMimeType(ContentService.MimeType.JSON)
+  .setHeaders(headers);
 }
 
 /**
@@ -316,35 +357,40 @@ function getSurveyStatistics() {
 }
 
 /**
- * 記錄提交日誌（修正：確保建立表後指派變數再 append）
+ * 記錄提交日誌
  */
-function logSubmission(data, success, errorMessage) {
-  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-  let sheet = ss.getSheetByName('提交日誌');
-
-  if (!sheet) {
-    sheet = ss.insertSheet('提交日誌');
+function logSubmission(data, success, errorMessage = '') {
+  const logSheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('提交日誌');
+  
+  if (!logSheet) {
+    // 建立日誌工作表
+    const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const newLogSheet = spreadsheet.insertSheet('提交日誌');
+    
+    // 設定日誌標題
     const logHeaders = ['時間', '用戶ID', '用戶名稱', '狀態', '錯誤訊息'];
-    sheet.getRange(1, 1, 1, logHeaders.length).setValues([logHeaders]);
-
-    const headerRange = sheet.getRange(1, 1, 1, logHeaders.length);
+    newLogSheet.getRange(1, 1, 1, logHeaders.length).setValues([logHeaders]);
+    
+    // 設定樣式
+    const headerRange = newLogSheet.getRange(1, 1, 1, logHeaders.length);
     headerRange.setBackground('#e74c3c');
     headerRange.setFontColor('white');
     headerRange.setFontWeight('bold');
-
-    sheet.setFrozenRows(1);
-    sheet.autoResizeColumns(1, logHeaders.length);
+    
+    newLogSheet.setFrozenRows(1);
+    newLogSheet.autoResizeColumns(1, logHeaders.length);
   }
-
+  
+  // 新增日誌記錄
   const logData = [
     new Date().toLocaleString('zh-TW'),
-    data && data.userId ? data.userId : '',
-    data && data.userName ? data.userName : '',
+    data.userId || '',
+    data.userName || '',
     success ? '成功' : '失敗',
-    errorMessage || ''
+    errorMessage
   ];
-
-  sheet.appendRow(logData);
+  
+  logSheet.appendRow(logData);
 }
 
 /**
