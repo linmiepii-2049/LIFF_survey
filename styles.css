@@ -436,6 +436,32 @@ body {
     line-height: 1.6;
 }
 
+.error-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.secondary-btn {
+    background: #fff;
+    color: #666;
+    border: 2px solid #ddd;
+    padding: 10px 16px;
+    border-radius: 25px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.secondary-btn:hover { border-color: #aaa; }
+
+.error-details {
+    text-align: left;
+    background: #f8f9fa;
+    color: #333;
+    border-radius: 10px;
+    padding: 12px;
+    margin-top: 12px;
+    max-height: 260px;
+    overflow: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
 .retry-btn {
     background: #e74c3c;
     color: white;

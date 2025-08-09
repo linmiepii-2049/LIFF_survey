@@ -87,6 +87,8 @@ class LIFFSurveyApp {
         const submitBtn = document.getElementById('submitBtn');
         const closeBtn = document.getElementById('closeBtn');
         const retryBtn = document.getElementById('retryBtn');
+        const toggleDetailsBtn = document.getElementById('toggleDetailsBtn');
+        const copyErrorBtn = document.getElementById('copyErrorBtn');
 
         // 表單提交事件
         form.addEventListener('submit', (e) => {
@@ -104,6 +106,40 @@ class LIFFSurveyApp {
             this.hideErrorMessage();
             this.handleFormSubmit();
         });
+
+        if (toggleDetailsBtn) {
+            toggleDetailsBtn.addEventListener('click', () => {
+                const el = document.getElementById('errorDetails');
+                if (!el) return;
+                const isHidden = el.style.display === 'none';
+                el.style.display = isHidden ? 'block' : 'none';
+                toggleDetailsBtn.textContent = isHidden ? '隱藏詳細' : '顯示詳細';
+            });
+        }
+
+        if (copyErrorBtn) {
+            copyErrorBtn.addEventListener('click', async () => {
+                const details = document.getElementById('errorDetails')?.textContent || '';
+                try {
+                    await navigator.clipboard.writeText(details);
+                    alert('錯誤資訊已複製');
+                } catch (_) {
+                    alert('複製失敗，請長按選取後手動複製');
+                }
+            });
+        }
+
+        // verbose=1 自動展開詳情
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('verbose') === '1') {
+            setTimeout(() => {
+                const el = document.getElementById('errorDetails');
+                if (el) {
+                    el.style.display = 'block';
+                    if (toggleDetailsBtn) toggleDetailsBtn.textContent = '隱藏詳細';
+                }
+            }, 0);
+        }
 
         // 表單驗證
         this.setupFormValidation();
@@ -235,7 +271,7 @@ class LIFFSurveyApp {
 
         } catch (error) {
             console.error('提交失敗:', error);
-            this.showError(error.message || '提交失敗，請稍後再試');
+            this.showError('提交失敗', error.message || String(error));
         } finally {
             submitBtn.disabled = false;
             submitBtn.classList.remove('loading');
@@ -427,12 +463,33 @@ class LIFFSurveyApp {
     /**
      * 顯示錯誤訊息
      */
-    showError(message) {
+    showError(message, detail = '') {
         const errorContainer = document.getElementById('errorMessage');
         const errorText = document.getElementById('errorText');
-        
+        const errorDetails = document.getElementById('errorDetails');
+
         errorText.textContent = message;
+
+        // 收集診斷資訊
+        const diagnostics = this.buildDiagnostics(detail);
+        if (errorDetails) {
+            errorDetails.textContent = diagnostics;
+        }
+
         errorContainer.style.display = 'flex';
+    }
+
+    buildDiagnostics(detail) {
+        const cfg = (typeof window !== 'undefined' && window.SurveyConfig) ? window.SurveyConfig : {};
+        const lines = [];
+        lines.push(`[時間] ${new Date().toLocaleString('zh-TW')}`);
+        lines.push(`[LIFF] inClient=${typeof liff !== 'undefined' ? String(liff.isInClient?.()) : 'no-sdk'} loggedIn=${typeof liff !== 'undefined' ? String(liff.isLoggedIn?.()) : 'no-sdk'}`);
+        lines.push(`[網路] online=${typeof navigator !== 'undefined' ? String(navigator.onLine) : 'n/a'}`);
+        lines.push(`[頁面] ${window.location.href}`);
+        lines.push(`[GAS_URL] ${cfg.googleAppsScript?.url || '(未設定)'} `);
+        lines.push(`[LIFF_ID] ${cfg.liff?.id || '(未設定)'} `);
+        if (detail) lines.push(`[錯誤詳情] ${detail}`);
+        return lines.join('\n');
     }
 
     /**

@@ -366,7 +366,12 @@
                 <div class="error-icon">❌</div>
                 <h2>提交失敗</h2>
                 <p id="errorText">發生錯誤，請稍後再試。</p>
-                <button id="retryBtn" class="retry-btn">重試</button>
+                <div class="error-actions">
+                    <button id="retryBtn" class="retry-btn">重試</button>
+                    <button id="toggleDetailsBtn" class="secondary-btn" type="button">顯示詳細</button>
+                    <button id="copyErrorBtn" class="secondary-btn" type="button">複製錯誤資訊</button>
+                </div>
+                <pre id="errorDetails" class="error-details" style="display: none;"></pre>
             </div>
         </div>
     </div>
